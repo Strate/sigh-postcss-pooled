@@ -19,10 +19,12 @@ function postcssPooledTask(opts) {
       map: {
         inline: false
       }
-    }).then(result => ({
-      data: result.css,
-      sourceMap: result.map
-    }));
+    }).then(result => {
+      return {
+        data: result.css,
+        map: result.map
+      }
+    });
   }
 }
 
@@ -34,13 +36,12 @@ function adaptEvent(compiler) {
 
     if (event.fileType !== 'css') return event;
 
-    return compiler(_.pick(event, 'type', 'data', 'path', 'projectPath')).then(result => {
-      event.data = result.data;
+    return compiler(_.pick(event, 'type', 'data', 'path', 'projectPath', 'sourcePath')).then(({data, map}) => {
+      event.data = data;
 
-      if (result.sourceMap) {
-        event.applySourceMap(result.sourceMap);
+      if (map) {
+        event.applySourceMap(map);
       }
-
 
       return event
     })
